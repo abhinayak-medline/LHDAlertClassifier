@@ -8,6 +8,8 @@ from datetime import datetime, timedelta
 Global Variables
 '''
 emails = np.array([])
+last_processed_time = None # Stores the last processed email's time
+
 '''
 function name: openOutlook
 inputs: None
@@ -19,7 +21,6 @@ def openOutlook():
 
     # Access the Outlook Application and its MAPI (Messaging Application Programming Interface) namespace
     outlook_app = win32com.client.Dispatch('outlook.application').GetNamespace("MAPI")
-    extractEmailsfromInbox(outlook_app, "Logistic System Alert", "Inbox", "Do Not Delete!!!")
 
 '''
 function name: extractEmailsfromInbox
@@ -33,6 +34,8 @@ References: https://medium.com/@balakrishna0106/automating-outlook-effortless-em
             ChatGPT 3.5
 '''
 def extractEmailsfromInbox(app, account, folder, subfolder):
+
+    global last_processed_time
 
     # Checks to see if the desired email account exists within the Outlook application
     myAccount = None
@@ -51,5 +54,38 @@ def extractEmailsfromInbox(app, account, folder, subfolder):
 
     emails = subfolder_inbox.Items
 
+    # Filter emails received after the last processed email's time
+    if last_processed_time:
+        emails = emails.Restrict(f"[ReceivedTime] > '{last_processed_time}'")
+
     for em in emails:
-        np.append(emails, Email(em))
+
+        received_time = em.ReceivedTime
+
+        if received_time > last_processed_time:
+            last_processed_time = received_time
+        
+         np.append(emails, Email(em))
+
+'''
+function name: main
+inputs: None
+outputs: None
+side effects: None
+References: ChatGPT 3.5
+'''
+def main():
+    global last_processed_time
+
+    openOutlook()
+    
+    while True:
+        # Retrieve new emails periodically
+        extractEmailsfromInbox(outlook_app, "Logistic System Alert", "Inbox", "Do Not Delete!!!")
+        
+        # Time interval (in seconds) for how often the emails will be extracted
+        time.sleep(60)
+
+# Starts the program
+if __name__ == "__main__":
+    main()
