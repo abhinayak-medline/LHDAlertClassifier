@@ -1,9 +1,8 @@
-
 '''
 class name: Email
 functions: __init__ - initializes all of the attributes of an Email object
            __str__ - prints all attributes of an Email object to the terminal
-References:  ChatGPT 3.5
+References:
 '''
 class Email:
     def __init__(self, message):
