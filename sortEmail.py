@@ -3,8 +3,8 @@ import numpy as np
 '''
 Global Variables
 '''
-sl_buckets_dict = {}
-subject_line_buckets = [
+sl_buckets = {}
+subject_lines = [
     "*URGENT*HTTP Service is down on <TMAP Server> at <Date>", "<Branch> - CROSSDOCK SERVICE CALL FAILURE", 
     "<Branch> - ERROR RECORDS IN T_CSINTERFACE", "<Branch> - RP Failed Messages", "<Branch> - WORK ASSIGN FAILED TO CATEGORIZE",
     "<Branch> dispatcher alert", "<Branch> G2P Incorrect Employee Issues", "<Branch> G2P MHE Pick Errors",
@@ -43,85 +43,88 @@ subject_line_buckets = [
 '''
 function name: buildBucketDictionary
 inputs: None
-outputs: None
-side effects: Populates the sl_buckets_dict dictionary with keys representing the different subject lines of the email alerts
+outputs: sl_buckets - dictionary that will store the sorted alerts
+side effects: Populates the global sl_buckets dictionary with keys representing the different subject lines of the email alerts
 '''
 def buildBucketsDictionary():
-    sl_buckets_dict = {key: [] for key in subject_line_buckets}
+    sl_buckets = {key: [] for key in subject_lines}
+    return sl_buckets
+
+'''
+function name: generateBucketSubstrings
+inputs: buckets - dictionary that will store the sorted emails
+outputs: bucket_substrings - 2D list that stores non-keyword parts of each key
+side effects: None
+'''
+def generateBucketSubstrings(buckets):
+
+    fillerKeywords = ["<Branch>", "<TMAP Server>", "<Date>", "<Server>", "<Service>", "<##%>", "<Loftware Server>", "<##>", "<P#>", "<Status>"]
+
+    bucket_substrings = []
+
+    for key in buckets:
+        keywords_in_key = []
+        # Appends the keywords that exist in the current key to a separate list
+        for keyword in fillerKeywords:
+            if key.count(keyword) != 0:
+                keywords_in_key.append(keyword)
+
+        # Modifies the current key to replace all of its keywords with the arbitrary string "<xx>"
+        mod_key = key
+        for ks in keywords_in_key:
+            mod_key = mod_key.replace(ks, "<xx>")
+
+        if len(keywords_in_key) == 0:
+            bucket_substrings.append([key])
+        else:
+            # If the key contains any keywords, it splits the key into several substrings at each of the <xx> locations
+            bucket_substrings.append(mod_key.split("<xx>"))
+    
+    return bucket_substrings
+
 
 '''
 function name: sortEmail
 inputs: email - Email Object to be sorted
-outputs: None
-side effects: Pushes email object into a database where it will be sorted by Priority Level and Subject Line
-References:
+        buckets - dictionary that will store the sorted emails
+        bucket_substrings - 2D list that stores non-keyword parts of each key
+outputs: buckets - dictionary that Email object will be pushed into where it will be matched to a key based on its subject line
+side effects:
 '''
-def sortAlerts(email):
+def sortAlerts(email, buckets, bucket_substrings):
 
-    # Process:
-    # Count the number of occurrences of the Keywords within the key (Max is 2), Keep a running total as you iterate through the keywords
-    # If the count is 0, then simply check if the key exists within the email's subject line
-    # If the count is 1, split the key by the keyword and check if each index within the list exists within the email's subject line
-    # If the count is 2, split the key into two separate lists by keywords and combine the lists by their differences, 
-    # then follow the process above
-    # If every index within the list is contained within the email's subject line, then there is a match and we can push this email
-    # object into the dictionary to its respective key
+    curr_index = 0
+    matchFound = False
 
-    fillerKeywords = ["<Branch>", "<TMAP Server>", "<Date>", "<Server>", "<Service>", "<##%>", "<Loftware Server>", "<##>", "<P#>", "<Status>"]
-
-    for key in sl_buckets_dict:
-
-        curr_key = key
-        keyword_total = 0
-        keywords_in_key = []
-
-        for keyword in fillerKeywords:
-
-            num = curr_key.count(keyword)
-            keyword_total += num
-            if num != 0:
-                keywords_in_key.append(keyword)
+    for key in buckets:
         
-        if keyword_total == 0:
+        # Checks if the key has been split or not due to whether or not it contains any keywords
+        if len(bucket_substrings[curr_index]) == 1:
 
-            if curr_key in email.subject:
-                sl_buckets_dict[curr_key].append(email)
-            else:
-                sl_buckets_dict["Unmatched"].append(email) # Pushes email to Unmatched branch if it can't be matched to one of the 98 types of alerts
+            if bucket_substrings[curr_index][0] in email.subject:
+                buckets[key].append(email)
+                matchFound = True
+                break
 
-        elif keyword_total == 1:
+        elif len(bucket_substrings[curr_index]) > 1:
 
-            keyword_substrings = curr_key.split(keywords_in_key[0])
-
-            # Used to check if every substring in the key is found within the email's subject line
-            target_match_num = len(keyword_substrings)
+            target_match_num = len(bucket_substrings[curr_index])
             curr_match_num = 0
 
-            for ks in keyword_substrings:
+            # Checks if every non-keyword substring of the key is contained within the email's subject line
+            for ks in bucket_substrings[curr_index]:
                 if ks in email.subject:
                     curr_match_num += 1
             
             if curr_match_num == target_match_num:
-                sl_buckets_dict[curr_key].append(email)
-            else:
-                sl_buckets_dict["Unmatched"].append(email)
+                buckets[key].append(email)
+                matchFound = True
+                break
         
-        elif keyword_total == 2:
+        curr_index+=1
 
-            keyword_substrings_A = curr_key.split(keywords_in_key[0])
-            keyword_substrings_B = curr_key.split(keywords_in_key[1])
-
-            keyword_substrings = list(set(keyword_substrings_A+keyword_substrings_B))
-
-            # Used to check if every substring in the key is found within the email's subject line
-            target_match_num = len(keyword_substrings)
-            curr_match_num = 0
-
-            for ks in keyword_substrings:
-                if ks in email.subject:
-                    curr_match_num += 1
+    if matchFound == False:
+        buckets["Unmatched"].append(email)
             
-            if curr_match_num == target_match_num:
-                sl_buckets_dict[curr_key].append(email)
-            else:
-                sl_buckets_dict["Unmatched"].append(email)
+    return buckets
+            

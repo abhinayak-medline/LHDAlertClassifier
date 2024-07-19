@@ -6,29 +6,37 @@ References:
 '''
 class Email:
     def __init__(self, message):
-        # Define properties and default values
-        properties = {
-            'subject': "No Subject",
-            'sender_name': "Unknown Sender",
-            'sender_email': "Unknown Email",
-            'to_recipients': "No recipients",
-            'cc_recipients': "",
-            'bcc_recipients': "",
-            'received_time': "Unknown",
-            'sent_on': "Unknown",
-            'html_body': "",
-            'text_body': "",
-            'attachments': [],
-            'size': 0
-        }
+        try:
+            self.subject = message.Subject if message.Subject else "No Subject"
+            self.sender_name = message.SenderName if message.SenderName else "Unknown Sender"
+            self.sender_email = message.SenderEmailAddress if message.SenderEmailAddress else "Unknown Email"
+            self.to_recipients = self.get_recipients(message.To)
+            self.cc_recipients = self.get_recipients(message.CC)
+            self.bcc_recipients = self.get_recipients(message.BCC)
+            self.received_time = message.ReceivedTime.strftime('%Y-%m-%d %H:%M:%S') if message.ReceivedTime else "Unknown"
+            self.sent_on = message.SentOn.strftime('%Y-%m-%d %H:%M:%S') if message.SentOn else "Unknown"
+            self.size = message.Size
+            self.html_body = message.HTMLBody
+            self.text_body = message.Body
+            self.attachments = self.extract_attachments(message)
+        except Exception as e:
+            print(f"Error initializing Email object: {e}")
+            # Handle the exception as needed
 
-        for prop, default_value in properties.items():
-            try:
-                setattr(self, prop, getattr(message, prop))
-            except AttributeError:
-                setattr(self, prop, default_value)
+    def get_recipients(self, recipients):
+        if recipients:
+            return recipients
+        return "No recipients"
 
-    # Used to print all data of a particular Email object
+    def extract_attachments(self, message):
+        attachments = []
+        for attachment in message.Attachments:
+            attachments.append({
+                'filename': attachment.FileName,
+                'size': attachment.Size
+            })
+        return attachments
+
     def __str__(self):
         return f"Subject: {self.subject}\n" \
                f"From: {self.sender_name} <{self.sender_email}>\n" \

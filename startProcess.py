@@ -2,13 +2,13 @@ import win32com.client
 import time
 import numpy as np
 from emailClass import Email
-from sortEmail import buildBucketsDictionary, sortAlerts, sl_buckets_dict
-from datetime import datetime, timedelta
+from sortEmail import buildBucketsDictionary, sortAlerts, generateBucketSubstrings, sl_buckets, subject_lines
+import datetime
 
 '''
 Global Variables
 '''
-emails = np.array([])
+alerts = np.array([])
 last_processed_time = None # Stores the last processed email's time
 
 '''
@@ -37,7 +37,7 @@ References: https://medium.com/@balakrishna0106/automating-outlook-effortless-em
 '''
 def extractEmailsfromInbox(app, account, folder, subfolder):
 
-    global last_processed_time
+    global last_processed_time, sl_buckets, bucket_substrings
     
     primary_inbox = app.Folders(account.DeliveryStore.DisplayName).Folders[folder]
     
@@ -45,19 +45,19 @@ def extractEmailsfromInbox(app, account, folder, subfolder):
 
     emails = subfolder_inbox.Items
 
-    # Filter emails received after the last processed email's time
-    if last_processed_time:
-        emails = emails.Restrict(f"[ReceivedTime] > '{last_processed_time}'")
+    print("Inbox Size: " + str(len(emails)))
+
+    emailsProcessed = 0
 
     for em in emails:
-
-        received_time = em.ReceivedTime
-
-        if received_time > last_processed_time:
-            last_processed_time = received_time
         
-        np.append(emails, Email(em))
-        sortAlerts(Email(em))
+        #np.append(alerts, Email(em))
+        print(Email(em).subject)
+        # print(em)
+        sl_buckets = sortAlerts(Email(em), sl_buckets, bucket_substrings)
+        emailsProcessed+=1
+        if emailsProcessed == 50:
+            break
 
 '''
 function name: updateAlertsCount
@@ -67,8 +67,8 @@ side effects: prints the number of emails generated for each type of alert to th
 '''
 def updateAlertsCount():
 
-    for key in sl_buckets_dict:
-        print(f"{key} : {len(sl_buckets_dict[key])}")
+    for key in sl_buckets:
+        print(f"{key} : {len(sl_buckets[key])}")
 
 '''
 function name: main
@@ -77,32 +77,40 @@ outputs: None
 side effects: None
 '''
 def main():
-    global last_processed_time
+    global last_processed_time, sl_buckets, bucket_substrings
+
+    # Set this value to be the date and time the alerts were last processed
+    # last_processed_time = datetime.datetime(2024, 7, 15, 12, 0, 0)
 
     outlook_app = openOutlook()
 
-    account_name = "Logistic System Alert"
+    account_email_address = "LogisticSystemAlert@medline.com"
 
     # Checks to see if the desired email account exists within the Outlook application
     myAccount = None
     for acc in outlook_app.Accounts:
-        if acc.DisplayName == account_name:
-            account = acc
+        if acc.SmtpAddress == account_email_address:
+            myAccount = acc
             break
     
     if not myAccount:
-        print(f"Account '{account}' not found.")
+        print(f"Account '{account_email_address}' not found.")
         return
 
-    buildBucketsDictionary()
+    sl_buckets = buildBucketsDictionary()
+    bucket_substrings = generateBucketSubstrings(sl_buckets)
     
     while True:
         # Retrieve new emails periodically
         extractEmailsfromInbox(outlook_app, myAccount, "Inbox", "Do Not Delete!!!")
         updateAlertsCount()
+        break
+
+        # Update last processed time to current time after processing emails
+        #last_processed_time = datetime.datetime.now()
 
         # Time interval (in seconds) for how often the emails will be extracted
-        time.sleep(60)
+        time.sleep(10)
 
 # Starts the program
 if __name__ == "__main__":
