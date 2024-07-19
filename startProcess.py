@@ -2,14 +2,20 @@ import win32com.client
 import time
 import numpy as np
 from emailClass import Email
-from sortEmail import buildBucketsDictionary, sortAlerts, generateBucketSubstrings, sl_buckets, subject_lines
+from sortEmail import buildBucketsDictionary, sortAlerts, generateBucketSubstrings, sl_buckets
 import datetime
+import math
+import sys
+from prettytable import PrettyTable
 
 '''
 Global Variables
 '''
 alerts = np.array([])
 last_processed_time = None # Stores the last processed email's time
+target_alerts_to_process = 500 # Edit this value based on how many alerts you want to process from the inbox 
+                                    # (Needs to be less than the size of the inbox)
+size_of_inbox = 0
 
 '''
 function name: openOutlook
@@ -35,9 +41,9 @@ outputs: None
 side effects: Populates global "emails" NumPy array with Email Objects that contain all of the necessary email data from a particular inbox
 References: https://medium.com/@balakrishna0106/automating-outlook-effortless-email-retrieval-using-pythons-win32com-client-796b13746ad9
 '''
-def extractEmailsfromInbox(app, account, folder, subfolder):
+def extractEmailsfromInbox(app, account, email_address, folder, subfolder):
 
-    global last_processed_time, sl_buckets, bucket_substrings
+    global last_processed_time, sl_buckets, bucket_substrings, size_of_inbox
     
     primary_inbox = app.Folders(account.DeliveryStore.DisplayName).Folders[folder]
     
@@ -45,18 +51,27 @@ def extractEmailsfromInbox(app, account, folder, subfolder):
 
     emails = subfolder_inbox.Items
 
-    print("Inbox Size: " + str(len(emails)))
+    print("----------------------------------------------------------------------------------------------------------")
+    print("Inbox Details:\n")
+    print("Email Address : " + email_address)
+    print("Size : " + str(len(emails)) + " Total Emails")
+    print("----------------------------------------------------------------------------------------------------------")
+    print("Error List:\n")
+    
+    size_of_inbox = len(emails)
 
-    emailsProcessed = 0
+    alertsProcessed = 0
 
     for em in emails:
         
-        #np.append(alerts, Email(em))
-        print(Email(em).subject)
+        # np.append(alerts, Email(em))
+        # print(Email(em).subject)
         # print(em)
         sl_buckets = sortAlerts(Email(em), sl_buckets, bucket_substrings)
-        emailsProcessed+=1
-        if emailsProcessed == 50:
+        alertsProcessed+=1
+        print(str(alertsProcessed) + "/" + str(target_alerts_to_process) + " emails processed", end='\r')
+        sys.stdout.flush()
+        if alertsProcessed == target_alerts_to_process:
             break
 
 '''
@@ -67,8 +82,34 @@ side effects: prints the number of emails generated for each type of alert to th
 '''
 def updateAlertsCount():
 
-    for key in sl_buckets:
-        print(f"{key} : {len(sl_buckets[key])}")
+    print("----------------------------------------------------------------------------------------------------------")
+    print("Logistics System Alert Inbox Snapshot: (Number of Alerts per Category)\n")
+    # for key in sl_buckets:
+    #     print(f"{key} : {len(sl_buckets[key])}")
+    alertCategoryTable = PrettyTable(["#","Alert Categories", "Number of Alerts"])
+    rowIndex = 1
+    alertCategoryTable.align["Alert Categories"] = "l"
+    alertCategoryTable.align["Number of Alerts"] = "c"
+    for key, value in sl_buckets.items():
+        alertCategoryTable.add_row([str(rowIndex), key, len(value)])
+        rowIndex+=1
+    print(alertCategoryTable)
+    print("\n")
+    totalAlertsTable = PrettyTable(["Total Number of Alerts Processed", "Total Size of Inbox", "Percentage of Inbox Processed"])
+    totalAlertsTable.add_row([str(target_alerts_to_process), str(size_of_inbox), str(round(target_alerts_to_process/size_of_inbox,5)*100)+"%"])
+    print(totalAlertsTable)
+    print("\n")
+    rowIndex = 1
+    unmatchedAlertsTable = PrettyTable(["#", "Unmatched Alerts"])
+    unmatchedAlertsTable.align["Unmatched Alerts"] = "l"
+    for value in sl_buckets["Unmatched"]:
+        unmatchedAlertsTable.add_row([str(rowIndex), value.subject])
+        rowIndex+=1
+    print(unmatchedAlertsTable)
+    print("\n")
+    print("Example of Stored Email Alert: (Unmatched Category)\n")
+    print(sl_buckets["Unmatched"][0])
+    print("----------------------------------------------------------------------------------------------------------")
 
 '''
 function name: main
@@ -102,7 +143,7 @@ def main():
     
     while True:
         # Retrieve new emails periodically
-        extractEmailsfromInbox(outlook_app, myAccount, "Inbox", "Do Not Delete!!!")
+        extractEmailsfromInbox(outlook_app, myAccount, account_email_address, "Inbox", "Do Not Delete!!!")
         updateAlertsCount()
         break
 

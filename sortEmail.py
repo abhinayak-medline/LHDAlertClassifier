@@ -13,8 +13,8 @@ subject_lines = [
     "Additional Pick not processed", "ADDPICKWQ Alert", "Alert : <Branch> Containers zero picked and in status 16 - need destaging."
     "Alert t_csmastcontdtl multiple label_addr1 for mark_num", 
     'Alert: [HIGH] 1 alert for "CBMA_ExtEOIOPick" on "af.p42.prdsapgpidbha" by scenario "G2P_<Branch>_PickConfirmOut"',
-    "Alert: Down: <Service> on Node <Server>", "Alert: ORA-00018 and ORA-03114", "ASN Not in CCT","BAM Notification",
-    "Bot Loading # Error Message For Processing", "Branches with more than 150 orders not assigned carrier code",
+    "Alert: Down: <Service> on Node <Server>", "Alert: ORA-00018 and ORA-03114", "ASN Not In CCT","BAM Notification",
+    "Bot Loading <#> Error Message For Processing", "Branches with more than 150 orders not assigned carrier code",
     "CA APM Alert from munprdsmap31: G2P Backlog Messages in Caution state", "Carrier close alert",
     "CCT C_QUEUEDMESSAGE INPROCESS FAILURE", "CCT C_QUEUEDMESSAGE Threshold of 3500 Exceeded", "CCT T_QUEUEDMESSAGE INPROCESS FAILURE",
     "Completed wave still in 29", "Container stuck in status 11", "CPU utilization is at <##%> on <Server>",
@@ -58,7 +58,7 @@ side effects: None
 '''
 def generateBucketSubstrings(buckets):
 
-    fillerKeywords = ["<Branch>", "<TMAP Server>", "<Date>", "<Server>", "<Service>", "<##%>", "<Loftware Server>", "<##>", "<P#>", "<Status>"]
+    fillerKeywords = ["<Branch>", "<TMAP Server>", "<Date>", "<Server>", "<Service>", "<##%>", "<Loftware Server>", "<##>", "<P#>", "<Status>", "<#>"]
 
     bucket_substrings = []
 
