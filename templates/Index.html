@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LHD Alerts Classifier Dashboard</title>
+    <link rel="stylesheet" href="static/styles.css">
+    <link rel="icon" href="static/medline-favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <header>
+        <h1>Logistics Help-Desk Alerts Dashboard</h1>
+        <nav class="header-nav">
+            <a href="/" class="nav-button">Home</a>
+            <a href="/analytics" class="nav-button">Analytics</a>
+            <a href="https://medline0-my.sharepoint.com/:u:/g/personal/anayak_medline_com/ESawN0jjC0ZCqpZjay8LenwBw9ncsUQ2WTECv7-D6SikBg?e=tkTcxm" class="nav-button">Alerts Processing Life Cycle</a>
+            <a href="https://medline0.sharepoint.com/teams/LogisticsHelpdesk/_layouts/15/Doc.aspx?sourcedoc={d763ddd4-2823-44aa-bbc7-7c00ad4249ba}&action=view&wd=target%28Alerts.one%7C6d2304a3-54ea-4502-b249-90bff1490fbf%2FCCT%20C_QUEUEDMESSAGE%20Threshold%20of%203500%20Exceeded%7C1dbd03ce-193d-4cf3-9c7c-4126301b4b11%2F%29&wdorigin=NavigationUrl" class="nav-button">Knowledge Documents</a>
+            <a href="https://medline0-my.sharepoint.com/:x:/g/personal/anayak_medline_com/EU4-tKVAJCtAhJYRzYVW4awB697W0EziKYx5smzDWJPSzA?e=vaII8Z" class="nav-button">Alert Info</a>
+        </nav>
+    </header>
+    <div class="logo-container">
+        <img src="static/medline-logo2.png" alt="Medline Logo">
+    </div>
+    <main>
+        <div class="filter-container">
+            <div class="filter-controls">
+                <select id="column-dropdown">
+                    <option value="">Select Column</option>
+                    <option value="id">ID</option>
+                    <option value="category">Category</option>
+                    <option value="urgency">Urgency</option>
+                    <option value="subject">Subject</option>
+                    <option value="sender_name">Sender Name</option>
+                    <option value="sender_email_address">Sender Email Address</option>
+                    <option value="to_recipients">To Recipients</option>
+                    <option value="cc_recipients">CC Recipients</option>
+                    <option value="bcc_recipients">BCC Recipients</option>
+                    <option value="received_time">Received Time</option>
+                    <option value="sent_on">Sent On</option>
+                    <option value="html_body">HTML Body</option>
+                    <option value="text_body">Text Body</option>
+                    <option value="attachments">Attachments</option>
+                    <option value="size">Size</option>
+                </select>
+                <select id="operator-dropdown">
+                    <option value="">Select Operator</option>
+                    <option value="STARTS WITH">Starts with</option>
+                    <option value="=">Equal to</option>
+                    <option value="!=">Not Equal to</option>
+                    <option value="LIKE">Like (SQL Format)</option>
+                    <option value="NOT LIKE">Not Like (SQL Format)</option>
+                    <option value="IS NULL">Is Empty</option>
+                    <option value="IS NOT NULL">Is Not Empty</option>
+                </select>
+                <input type="text" id="filter-value" placeholder="Enter value">
+                <button id="apply-query">Apply Query</button>
+                <button id="reset-query" style="display: none;">Reset Table</button>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table id="alerts-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Category</th>
+                        <th>Urgency Level</th>
+                        <th>Subject</th>
+                        <th>Sender Name</th>
+                        <th>Sender Email Address</th>
+                        <th>To Recipients</th>
+                        <th>CC Recipients</th>
+                        <th>BCC Recipients</th>
+                        <th>Received Time</th>
+                        <th>Sent On</th>
+                        <th>HTML Body</th>
+                        <th>Text Body</th>
+                        <th>Attachments</th>
+                        <th>Size</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data rows will be inserted here -->
+                </tbody>
+            </table>
+            <div id="entry-count" class="entry-count">Showing 0 of 0 entries</div>
+        </div>
+        
+        <div class="pagination-controls">
+            <button id="prev-page">Previous</button>
+            <span id="page-info">Page 1</span>
+            <button id="next-page">Next</button>
+        </div>
+    </main>
+    <script>
+        let currentPage = 1;
+        const rowsPerPage = 50; // Number of rows per page
+        let totalRows = 0; // Total number of rows from server
+        let allData = []; // To store all fetched data
+
+        async function fetchData() {
+            const column = document.querySelector('#column-dropdown').value;
+            const operator = document.querySelector('#operator-dropdown').value;
+            const value = document.querySelector('#filter-value').value.trim();
+
+            let url = '/data';
+            if (column && operator) {
+                url += `?column=${encodeURIComponent(column)}&operator=${encodeURIComponent(operator)}&value=${encodeURIComponent(value)}`;
+            }
+
+            try {
+                const response = await fetch(url);
+                if (response.status === 503) {
+                    document.querySelector('#alerts-table tbody').innerHTML = '<tr><td colspan="14">Processing, please wait...</td></tr>';
+                    setTimeout(fetchData, 5000); // Retry after 5 seconds
+                    return;
+                }
+                const result = await response.json();
+                allData = result.data; // Store all data
+                totalRows = result.total_count; // Set total rows based on fetched data
+                renderTableData(allData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage));
+                document.querySelector('#reset-query').style.display = 'inline'; // Show reset button
+            } catch (error) {
+                console.error('Error loading table data:', error);
+            }
+        }
+
+        function renderTableData(data) {
+            const tableBody = document.querySelector('#alerts-table tbody');
+            tableBody.innerHTML = ''; // Clear existing rows
+
+            if (data.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="14">No entries found</td></tr>';
+                return;
+            }
+
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                
+                // Create table cells with appropriate content
+                tr.innerHTML = `
+                    <td>${row.id || 'N/A'}</td>
+                    <td>${row.category || 'N/A'}</td>
+                    <td>${row.urgency || 'N/A'}</td>
+                    <td>${row.subject || 'N/A'}</td>
+                    <td>${row.sender_name || 'N/A'}</td>
+                    <td>${row.sender_email_address || 'N/A'}</td>
+                    <td>${row.to_recipients || 'N/A'}</td>
+                    <td>${row.cc_recipients || 'N/A'}</td>
+                    <td>${row.bcc_recipients || 'N/A'}</td>
+                    <td>${row.received_time || 'N/A'}</td>
+                    <td>${row.sent_on || 'N/A'}</td>
+                    <td><pre><div class="html-content">${row.html_body || 'N/A'}</div></pre></td>
+                    <td>${row.text_body || 'N/A'}</td>
+                    <td>${row.attachments || 'N/A'}</td>
+                    <td>${row.size || 'N/A'}</td>
+                `;
+
+                // Append row to the table body
+                tableBody.appendChild(tr);
+            });
+
+            updatePaginationControls();
+            updateEntryCount();
+
+            // Scroll to the top of the table container
+            document.querySelector('.table-container').scrollTop = 0;
+        }
+
+        function updateEntryCount() {
+            const entryCountElement = document.querySelector('#entry-count');
+            const startIndex = (currentPage - 1) * rowsPerPage + 1;
+            const endIndex = Math.min(currentPage * rowsPerPage, totalRows);
+            entryCountElement.textContent = `Showing ${startIndex} to ${endIndex} of ${totalRows} entries`;
+        }
+
+        function updatePaginationControls() {
+            document.querySelector('#page-info').textContent = `Page ${currentPage}`;
+            document.querySelector('#prev-page').disabled = (currentPage === 1);
+            document.querySelector('#next-page').disabled = (currentPage * rowsPerPage >= totalRows);
+        }
+
+        document.querySelector('#prev-page').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                fetchData();
+            }
+        });
+
+        document.querySelector('#next-page').addEventListener('click', () => {
+            if (currentPage * rowsPerPage < totalRows) {
+                currentPage++;
+                fetchData();
+            }
+        });
+
+        document.querySelector('#apply-query').addEventListener('click', () => {
+            currentPage = 1; // Reset to the first page
+            fetchData();
+            window.scrollTo(0, 0); // Scroll to the top of the page
+        });
+
+        document.querySelector('#reset-query').addEventListener('click', () => {
+            document.querySelector('#column-dropdown').value = '';
+            document.querySelector('#operator-dropdown').value = '';
+            document.querySelector('#filter-value').value = '';
+            //document.querySelector('#reset-query').style.display = 'none'; // Hide reset button
+            currentPage = 1; // Reset to the first page
+            fetchData(); // Fetch all data
+        });
+
+        window.onload = fetchData;
+    </script>
+</body>
+</html>

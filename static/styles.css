@@ -1,0 +1,295 @@
+/* Basic reset to ensure consistent styling across browsers */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Full height for the body and html elements */
+html, body {
+    height: 100%;
+    font-family: 'Inter', sans-serif;
+    position: relative;
+    overflow: hidden; /* Prevent extra scrollbars */
+}
+
+/* Styling for the header */
+header {
+    background-color: #000000; /* Medline blue */
+    color: white;
+    padding: 10px;
+    text-align: left;
+    padding-left: 50px;
+    z-index: 1; /* Ensure the header is above other content */
+}
+
+/* Styling for the header text */
+header h1 {
+    font-size: 20px;
+}
+
+/* Styling for the main content area */
+main {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 25px); /* Ensure main content area takes up remaining space */
+    background-color: #f4f4f4; /* Match the rest of the page */
+    padding: 20px;
+    overflow: hidden; /* Prevent extra space */
+}
+
+/* Styling directly for the charts */
+#bar-chart {
+    width: 100%; /* Full width of the container */
+    height: 400px; /* Fixed height */
+    background-color: white; /* Ensure chart background is white */
+    border: 1px solid #ddd; /* Light border to differentiate from the background */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for better visibility */
+}
+
+/* Chart Container Styling */
+.chart-container {
+    display: flex; /* Flexbox for horizontal layout */
+    flex-direction: column; /* Stack charts vertically */
+    align-items: center; /* Center-align items horizontally */
+    width: 100%;
+    max-width: 1200px; /* Limit maximum width */
+    border: 2px solid #000000; /* Black border */
+    margin: 20px 0; /* Space above and below the chart container */
+}
+
+.chart-wrapper {
+    display: flex; /* Horizontal layout for charts */
+    justify-content: space-between; /* Space between charts */
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.chart {
+    flex: 1; /* Allow charts to take up available space */
+    margin: 0 10px; /* Space between charts */
+}
+
+/* Styling for buttons */
+button {
+    margin: 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+/* Styling for the logo container */
+.logo-container {
+    position: fixed; /* Use fixed positioning to keep it in the viewport */
+    top: 7px; /* Space from the top edge */
+    left: 10px; /* Space from the left edge */
+    z-index: 1; /* Ensure the logo is above other content */
+}
+
+/* Styling for the logo image */
+.logo-container img {
+    width: 30px; /* Adjust the size of the logo */
+    height: auto;
+}
+
+/* Table Container Styling */
+.table-container {
+    width: 95%; /* Adjust width to be almost full screen */
+    max-width: 100vw; /* Ensure it fits within viewport width */
+    height: calc(100vh - 300px); /* Adjust height to be slightly larger but still compact */
+    overflow: auto; /* Enable scrolling */
+    border: 1px solid #0033A0; /* Medline blue border */
+    margin-top: 10px; /* Increased space from the header */
+    margin-bottom: 20px;
+    background-color: #ffffff; /* White background to match table */
+}
+
+/* Table Styling */
+table {
+    width: 100%; /* Table takes full width of the container */
+    border-collapse: collapse;
+    font-size: 12px; /* Smaller font size */
+}
+
+th, td {
+    border: 1px solid #000207;
+    padding: 4px; /* Reduced padding for smaller table */
+    text-align: center;
+}
+
+th {
+    background-color: #0033A0; /* Medline blue for headers */
+    color: #ffffff; /* White text for contrast */
+    font-weight: bold; /* Ensure headers are bold */
+    position: -webkit-sticky; /* For Safari */
+    position: sticky; /* Sticky positioning */
+    top: 0; /* Stick to the top of the table container */
+    z-index: 2; /* Ensure headers are above other rows */
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9; /* Slightly lighter grey for alternating rows */
+}
+
+tr:hover {
+    background-color: #e0e0e0; /* Slightly darker grey for hover effect */
+}
+
+/* Pagination Controls */
+.pagination-controls {
+    display: flex;
+    justify-content: center; /* Center-align pagination controls */
+    align-items: center; /* Center-align items vertically */
+    margin-top: 10px; /* Reduced margin */
+}
+
+button {
+    padding: 8px 12px; /* Smaller padding */
+    margin: 0 4px; /* Smaller margin */
+    border: 1px solid #0033A0; /* Medline blue border */
+    background-color: #ffffff; /* White background */
+    color: #0033A0; /* Medline blue text */
+    cursor: pointer;
+    font-family: 'Inter', sans-serif; /* Match header font family */
+    font-weight: bold; /* Bold text */
+    font-size: 12px; /* Smaller font size */
+    border-radius: 4px; /* Rounded corners for buttons */
+}
+
+button:hover {
+    background-color: #0033A0; /* Medline blue background on hover */
+    color: #ffffff; /* White text on hover */
+}
+
+button:disabled {
+    background-color: #e0e0e0; /* Disabled button background */
+    color: #9e9e9e; /* Disabled button text color */
+    cursor: not-allowed; /* Not-allowed cursor */
+}
+
+/* Ensure bold and correct font for the page info */
+#page-info {
+    font-family: 'Inter', sans-serif; /* Match header font family */
+    font-weight: bold; /* Ensure the page info text is bold */
+    font-size: 12px; /* Smaller font size */
+}
+
+/* Filter Container Styles */
+.filter-container {
+    display: block; /* Ensure the container is visible */
+    width: 100%;
+    max-width: 800px; /* Adjust as needed */
+    margin: 20px auto; /* Center container horizontally */
+}
+
+/* Filter Controls Flex Layout */
+.filter-controls {
+    display: flex;
+    gap: 10px; /* Space between elements */
+    align-items: center; /* Center items vertically */
+    flex-wrap: wrap; /* Allow wrapping if space is insufficient */
+    margin-bottom: 20px; /* Space below the controls */
+}
+
+/* Style for dropdowns and text field */
+select, input[type="text"] {
+    padding: 8px;
+    border: 1px solid #0033A0; /* Medline blue border */
+    border-radius: 4px;
+    font-size: 14px; /* Match existing font size */
+    background-color: #ffffff; /* White background to match the theme */
+    color: #333; /* Dark text color */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: subtle shadow for better visibility */
+}
+
+/* Style for select dropdowns */
+select {
+    width: 150px; /* Adjust width for dropdowns */
+}
+
+/* Style for text input field */
+input[type="text"] {
+    width: 200px; /* Adjust width for text field */
+}
+
+/* Style for buttons in filter container */
+.filter-controls button {
+    padding: 8px 12px; /* Consistent padding */
+    border: 1px solid #0033A0; /* Medline blue border */
+    background-color: #ffffff; /* White background */
+    color: #0033A0; /* Medline blue text */
+    font-family: 'Inter', sans-serif; /* Match header font family */
+    font-weight: bold; /* Bold text */
+    font-size: 12px; /* Smaller font size */
+    border-radius: 4px; /* Rounded corners for buttons */
+    cursor: pointer; /* Pointer cursor */
+    transition: background-color 0.3s; /* Smooth hover effect */
+}
+
+/* Specific styling for "Apply" button */
+#apply-filters {
+    margin-right: 5px; /* Space between apply and reset buttons */
+}
+
+/* Specific styling for "Reset Table" button */
+#reset-query {
+    display: inline; /* Ensure button is displayed */
+}
+
+/* Hover and Disabled States for Buttons */
+.filter-controls button:hover {
+    background-color: #0033A0; /* Medline blue background on hover */
+    color: #ffffff; /* White text on hover */
+}
+
+.filter-controls button:disabled {
+    background-color: #e0e0e0; /* Disabled button background */
+    color: #9e9e9e; /* Disabled button text color */
+    cursor: not-allowed; /* Not-allowed cursor */
+}
+
+/* Header navigation styling */
+.header-nav {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    display: flex;
+    gap: 10px; /* Space between buttons */
+}
+
+.nav-button {
+    display: inline-block;
+    padding: 5px 10px;
+    color: white;
+    background-color: black;
+    text-decoration: none;
+    font-family: Arial, sans-serif; /* Ensure font matches the header */
+    font-size: 14px; /* Adjust font size as needed */
+    border-radius: 3px;
+    text-align: center;
+    transition: background-color 0.3s;
+}
+
+.nav-button:hover {
+    background-color: #333; /* Slightly lighter color on hover */
+}
+
+/* Entry count styling */
+.entry-count {
+    position: absolute;
+    bottom: 75px;
+    right: 60px;
+    font-family: 'Inter', sans-serif; /* Match font family */
+    font-weight: bold; /* Ensure the text is bold */
+    font-size: 12px; /* Match font size to other text elements */
+    color: #000; /* Text color */
+}
+
+/* CSS for HTML content in table cells */
+.html-content {
+    max-height: 100px; /* Limit height of the content */
+    overflow: auto; /* Enable scrolling if content overflows */
+    white-space: pre-wrap; /* Preserve whitespace formatting */
+}

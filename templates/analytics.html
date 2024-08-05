@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LHD Alerts Classifier Dashboard</title>
+    <link rel="stylesheet" href="static/styles.css">
+    <link rel="icon" href="static/medline-favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <header>
+        <h1>Logistics Help-Desk Alerts Dashboard</h1>
+        <nav class="header-nav">
+            <a href="/" class="nav-button">Home</a>
+            <a href="/analytics" class="nav-button">Analytics</a>
+            <a href="https://medline0-my.sharepoint.com/:u:/g/personal/anayak_medline_com/ESawN0jjC0ZCqpZjay8LenwBw9ncsUQ2WTECv7-D6SikBg?e=tkTcxm" class="nav-button">Alerts Processing Life Cycle</a>
+            <a href="https://medline0.sharepoint.com/teams/LogisticsHelpdesk/_layouts/15/Doc.aspx?sourcedoc={d763ddd4-2823-44aa-bbc7-7c00ad4249ba}&action=view&wd=target%28Alerts.one%7C6d2304a3-54ea-4502-b249-90bff1490fbf%2FCCT%20C_QUEUEDMESSAGE%20Threshold%20of%203500%20Exceeded%7C1dbd03ce-193d-4cf3-9c7c-4126301b4b11%2F%29&wdorigin=NavigationUrl" class="nav-button">Knowledge Documents</a>
+            <a href="https://medline0-my.sharepoint.com/:x:/g/personal/anayak_medline_com/EU4-tKVAJCtAhJYRzYVW4awB697W0EziKYx5smzDWJPSzA?e=vaII8Z" class="nav-button">Alert Info</a>
+        </nav>
+    </header>
+    <div class="logo-container">
+        <img src="static/medline-logo2.png" alt="Medline Logo">
+    </div>
+    <main>
+        <div class="chart-container">
+            <canvas id="bar-chart"></canvas>
+        </div>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const ctx = document.getElementById('bar-chart').getContext('2d');
+
+            const barChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [], // Labels will be dynamically updated
+                    datasets: [{
+                        label: 'Number of Entries',
+                        data: [], // Data will be dynamically updated
+                        backgroundColor: '#0033A0', // Medline blue
+                        borderColor: 'rgba(0, 0, 0, 1)',
+                        borderWidth: 1,
+                        barThickness: 20,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false,
+                            position: 'right'
+                        },
+                        title: {
+                            display: true,
+                            text: 'LHD Alerts Inbox Snapshot by Category',
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            },
+                            color: '#000000', // Black color for the title
+                            padding: {
+                                top: 10,
+                                bottom: 20
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Category'
+                            },
+                            ticks: {
+                                display: false,
+                                autoSkip: false, // Prevent labels from being skipped
+                                maxRotation: 90, // Rotate labels if they overlap
+                                minRotation: 45 // Optional: Rotate labels to fit more in view
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Entries'
+                            }
+                        }
+                    }
+                }
+            });
+
+            async function fetchChartData() {
+                try {
+                    const response = await fetch('/chart_data'); // Fetch data from new Flask endpoint
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    const data = await response.json();
+                    console.log('Fetched Chart Data:', data);
+
+                    // Extract labels and data from the response
+                    const labels = Object.keys(data);
+                    const values = Object.values(data);
+
+                    // Update the chart with new data
+                    barChart.data.labels = labels;
+                    barChart.data.datasets[0].data = values;
+                    barChart.update();
+                } catch (error) {
+                    console.error('Error fetching chart data:', error);
+                }
+            }
+
+            // Fetch chart data and update chart on page load
+            fetchChartData();
+        });
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+</html>
