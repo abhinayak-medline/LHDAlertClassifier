@@ -51,4 +51,5 @@ To-do List:
 2. Sometimes, when the number of emails to be processed exceeds 1000, the sorted email data doesn't display properly within the webpage's database table.
 3. Host this application on a domain or server if you don't want to keep running this code locally.
 4. Implement Medline's email retention policy.
-5. Add more charts to the analytics page?
+5. Add a Sort By Date filter to the database table on the webpage.
+6. Add more charts to the analytics page?
