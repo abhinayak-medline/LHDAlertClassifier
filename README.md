@@ -21,7 +21,7 @@ What to do if you want to extract more email data from Outlook:
 
 What to do if you want to add a new alert to the application to be tracked:
 - Navigate to the sortEmail.py file and find the subject_lines array. Add the name of the alert in String format to this array (the index where you place this alert in the array doesn't matter).
-- Next, find the generateBucketSubstrings function and add the placeholder tag in the name of the alert in String format to the fillerKeywords array if it does not exist in it already (Ex:// <Branch> is a placeholder tag).
+- Next, find the generateBucketSubstrings function and add the placeholder tag in the name of the alert in String format to the fillerKeywords array if it does not exist in it already (Ex://<Branch> is a placeholder tag).
 - Lastly, go to the assignPriority function and add the name of the alert to its respective priority level array.
 - Make sure to save this file after making all of these changes.
 
