@@ -15,12 +15,14 @@ class Email:
             self.html_body = message.HTMLBody if hasattr(message, 'HTMLBody') else "HTMLBody not Found"
             self.text_body = message.Body if hasattr(message, 'Body') else "Body not Found"
             self.attachments = self.extract_attachments(message) if hasattr(message, 'Attachments') else []
-            self.urgency = 0
+            self.urgency = "0"
         except AttributeError as ae:
-            print(f"- AttributeError (Property Not Found): {ae}\n")
+            b = 404
+            #print(f"- AttributeError (Property Not Found): {ae}\n")
             # Handle attribute errors (e.g., property not found)
         except Exception as e:
-            print(f"- Error initializing Email object: {e}\n")
+            a = 404
+            #print(f"- Error initializing Email object: {e}\n")
             # Handle other exceptions as needed
 
     def extract_recipients(self, recipients):

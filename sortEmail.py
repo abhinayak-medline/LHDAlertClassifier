@@ -37,7 +37,7 @@ subject_lines = [
     "Transhist Recovery File : Medium", "Unwaved delivery with Alloc_Qty", "UPS File Monitor",
     "Warning events detected for All Critical Alerts!", "Wave check failed", "Wave Errors", "Wave not processed","WDScan.dir is missing",
     "Whszone alert", "WMS <Branch> crossdock service call errors", "WMS <Branch> Missing Ship Units", "Work assign fail to categorize",
-    "XML Recovery File : Medium", "Zero picked WKA", "Unmatched"
+    "XML Recovery File : Medium", "Zero picked WKA error", "Unmatched", "Windows EventID 142 triggered on MUNPRDLWAREBK"
     ]
 
 '''
@@ -143,7 +143,8 @@ def assignPriority(key, email):
         "Print Spooler Service is <Status> on <Server>",
         "Splunk Alert: Logistics_Alert:MIS_ECC-EDI_OUTBOUND_SHIP_ASN and MIS_WMS-SHP_PRE_POGI_ASN_GENERATE",
         "Wave check failed",
-        "Wave Errors"
+        "Wave Errors",
+        "Windows EventID 142 triggered on MUNPRDLWAREBK"
     ]
 
     priority_2 = [
@@ -218,7 +219,7 @@ def assignPriority(key, email):
         "<Branch> G2P Incorrect Employee Issues",
         "<Branch> ZPOGI - Stuck in picking",
         'Alert: [HIGH] 1 alert for "CBMA_ExtEOIOPick" on "af.p42.prdsapgpidbha"  by scenario "G2P_<Branch>_PickConfirmOut"',
-        "Bot Loading # Error Message For Processing",
+        "Bot Loading <#> Error Message For Processing",
         "Carrier close alert",
         "CCT C_QUEUEDMESSAGE INPROCESS FAILURE",
         "Events detected for All Critical Alerts.",
@@ -237,14 +238,16 @@ def assignPriority(key, email):
     ]
 
     if key in priority_1:
-        email.urgency = 1
+        email.urgency = "1"
     elif key in priority_2:
-        email.urgency = 2
+        email.urgency = "2"
     elif key in priority_3:
-        email.urgency = 3
+        email.urgency = "3"
     elif key in priority_4:
-        email.urgency = 4
+        email.urgency = "4"
     elif key in priority_5:
-        email.urgency = 5
+        email.urgency = "5"
+    else:
+        email.urgency = "0"
     
     return email

@@ -104,6 +104,26 @@ def get_data():
         elif operator == "IS NOT EMPTY":
             query += f" WHERE {column} IS NOT NULL AND {column} != ''"
             total_query += f" WHERE {column} IS NOT NULL AND {column} != ''"
+        elif operator == ">":
+            query += f" WHERE {column} > ?"
+            params.append(value)
+            total_query += f" WHERE {column} > ?"
+            total_params.append(value)
+        elif operator == "<":
+            query += f" WHERE {column} < ?"
+            params.append(value)
+            total_query += f" WHERE {column} < ?"
+            total_params.append(value)
+        elif operator == ">=":
+            query += f" WHERE {column} >= ?"
+            params.append(value)
+            total_query += f" WHERE {column} >= ?"
+            total_params.append(value)
+        elif operator == "<=":
+            query += f" WHERE {column} <= ?"
+            params.append(value)
+            total_query += f" WHERE {column} <= ?"
+            total_params.append(value)
 
     try:
         if not os.path.exists('data/process_complete.txt'):
@@ -134,6 +154,7 @@ def get_data():
                 'received_time': row['received_time'],
                 'sent_on': row['sent_on'],
                 'html_body': html.escape(row['html_body']),
+                #'html_body': row['html_body'],
                 'text_body': row['text_body'],
                 'attachments': row['attachments'],
                 'size': row['size']

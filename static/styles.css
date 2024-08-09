@@ -289,7 +289,10 @@ input[type="text"] {
 
 /* CSS for HTML content in table cells */
 .html-content {
-    max-height: 100px; /* Limit height of the content */
+    text-align: center;
+    vertical-align: middle;
+    height: calc(100vh - 300px);
+    max-width: 1000px;
     overflow: auto; /* Enable scrolling if content overflows */
-    white-space: pre-wrap; /* Preserve whitespace formatting */
+    white-space: no-wrap; /* Preserve whitespace formatting */
 }

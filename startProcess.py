@@ -14,8 +14,8 @@ import json
 Global Variables
 '''
 alerts = np.array([])
-last_processed_time = None  # Stores the last processed email's time
-target_alerts_to_process = 5000  # Edit this value based on how many alerts you want to process from the inbox, cannot exceed total number of alerts
+last_processed_time = None
+target_alerts_to_process = 1000  # Edit this value based on how many alerts you want to process from the inbox
 size_of_inbox = 0
 
 '''
@@ -41,7 +41,7 @@ def extractEmailsfromInbox(outlook_app, account, email_address, folder_name, sub
         print(f"Email Address : {email_address}")
         print(f"Size : {len(subfolder_inbox.Items)} Total Emails")
         print("----------------------------------------------------------------------------------------------------------")
-        print("Error List:\n")
+        #print("Error List:\n")
 
         size_of_inbox = len(subfolder_inbox.Items)
         alerts_processed = 0
@@ -49,7 +49,7 @@ def extractEmailsfromInbox(outlook_app, account, email_address, folder_name, sub
         emails = subfolder_inbox.Items
 
         # Sort messages by received time from oldest to newest
-        emails.Sort("[ReceivedTime]", False)
+        emails.Sort("[ReceivedTime]", True)
 
         start_time = time.time()  # Start time for processing
 
@@ -159,7 +159,7 @@ def insertAlertsIntoDatabase():
             CREATE TABLE IF NOT EXISTS alerts (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 category TEXT,
-                urgency INTEGER,
+                urgency TEXT,
                 subject TEXT,
                 sender_name TEXT,
                 sender_email_address TEXT,

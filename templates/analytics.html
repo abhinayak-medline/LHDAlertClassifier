@@ -115,9 +115,22 @@
                     const labels = Object.keys(data);
                     const values = Object.values(data);
 
-                    // Update the chart with new data
-                    barChart.data.labels = labels;
-                    barChart.data.datasets[0].data = values;
+                    // Combine labels and values into an array of objects for sorting
+                    const combined = labels.map((label, index) => ({
+                        label,
+                        value: values[index]
+                    }));
+
+                    // Sort the combined array by value (ascending order)
+                    combined.sort((a, b) => a.value - b.value);
+
+                    // Extract sorted labels and values
+                    const sortedLabels = combined.map(item => item.label);
+                    const sortedValues = combined.map(item => item.value);
+
+                    // Update the chart with sorted data
+                    barChart.data.labels = sortedLabels;
+                    barChart.data.datasets[0].data = sortedValues;
                     barChart.update();
                 } catch (error) {
                     console.error('Error fetching chart data:', error);
