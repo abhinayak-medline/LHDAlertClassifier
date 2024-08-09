@@ -50,4 +50,5 @@ To-do List:
 1. Figure out why this application cannot extract all of the emails from this inbox (When trying to process all of the emails, I noticed that Outlook freezes at around 60,000 emails out of the almost 80,000 total emails).
 2. Sometimes, when the number of emails to be processed exceeds 1000, the sorted email data doesn't display properly within the webpage's database table.
 3. Host this application on a domain or server if you don't want to keep running this code locally.
-4. Add more charts to the analytics page?
+4. Implement Medline's email retention policy.
+5. Add more charts to the analytics page?
